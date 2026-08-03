@@ -99,6 +99,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
   useEffect(() => {
     loadParlour();
+    window.localStorage.setItem("pawlour_last_parlour", slug);
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUserId(user?.id ?? null);
       setAuthChecked(true);
