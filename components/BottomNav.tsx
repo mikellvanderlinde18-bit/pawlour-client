@@ -1,10 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { PawIcon, UserIcon } from "./icons";
+import { PawIcon, UserIcon, ScissorsIcon } from "./icons";
 
 const TABS = [
   { key: "book", label: "Book", Icon: PawIcon, href: (slug: string) => `/book/${slug}` },
+  { key: "offers", label: "Offers", Icon: ScissorsIcon, href: (slug: string) => `/book/${slug}/offers` },
   { key: "account", label: "Account", Icon: UserIcon, href: (slug: string) => `/book/${slug}/account` },
 ];
 
