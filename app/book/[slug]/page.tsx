@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, use } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { PawIcon } from "@/components/icons";
@@ -23,6 +24,7 @@ type Dog = { id: string; name: string; size: string | null; coat_type: string | 
 
 export default function BookingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
+  const router = useRouter();
   const supabase = createClient();
 
   const [parlour, setParlour] = useState<Parlour | null>(null);
@@ -120,17 +122,26 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         .eq("auth_user_id", userId)
         .maybeSingle();
 
-      if (existing) {
-        setClientRecord(existing);
-        const { data: dogRows } = await supabase
-          .from("dog")
-          .select("id, name, size, coat_type")
-          .eq("client_id", existing.id)
-          .order("name");
-        setDogs(dogRows ?? []);
+      if (!existing) {
+        router.push(`/book/${slug}/welcome`);
+        return;
       }
+
+      setClientRecord(existing);
+      const { data: dogRows } = await supabase
+        .from("dog")
+        .select("id, name, size, coat_type")
+        .eq("client_id", existing.id)
+        .order("name");
+
+      if (!dogRows || dogRows.length === 0) {
+        router.push(`/book/${slug}/welcome`);
+        return;
+      }
+
+      setDogs(dogRows);
     })();
-  }, [userId, parlour, supabase]);
+  }, [userId, parlour, supabase, router, slug]);
 
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
@@ -408,6 +419,14 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           </div>
           <h1 className="text-2xl font-semibold text-[#14261F]">{parlour.name}</h1>
           <p className="text-sm text-[#14261F]/50 mt-1">Book your dog&apos;s next groom</p>
+          {!userId && (
+            <a
+              href={`/book/${slug}/welcome`}
+              className="inline-block text-xs text-[#D98F5F] font-medium underline mt-2"
+            >
+              New here? Set up your dog&apos;s profile
+            </a>
+          )}
         </div>
 
         {error && (
