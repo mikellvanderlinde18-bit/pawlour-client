@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback, use } from "react";
 import { createClient } from "@/lib/supabase/client";
+import BottomNav from "@/components/BottomNav";
+import { PawIcon } from "@/components/icons";
 
 type Parlour = { id: string; name: string };
 type Dog = { id: string; name: string; breed: string | null; size: string | null };
@@ -123,8 +125,22 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-[#14261F]/50">Loading…</p>
+      <div className="min-h-screen px-4 py-10 pb-28">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="h-5 w-32 rounded-lg skeleton mb-2" />
+              <div className="h-3 w-20 rounded-lg skeleton" />
+            </div>
+          </div>
+          <div className="h-11 rounded-full skeleton mb-8" />
+          <div className="h-24 rounded-2xl skeleton mb-6" />
+          <div className="h-4 w-32 rounded-lg skeleton mb-3" />
+          <div className="space-y-2">
+            <div className="h-16 rounded-2xl skeleton" />
+            <div className="h-16 rounded-2xl skeleton" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -139,7 +155,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
 
   if (!loggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 text-center">
+      <div className="min-h-screen flex items-center justify-center px-4 text-center pb-28">
         <div>
           <p className="text-sm text-[#14261F]/60 mb-4">
             Sign in to see your bookings and dogs.
@@ -151,6 +167,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
             Go book something →
           </a>
         </div>
+        <BottomNav slug={slug} />
       </div>
     );
   }
@@ -162,7 +179,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
     : 0;
 
   return (
-    <div className="min-h-screen px-4 py-10">
+    <div className="min-h-screen px-4 py-10 pb-28">
       <div className="max-w-md mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -257,8 +274,8 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
               key={dog.id}
               className="bg-white border border-black/10 rounded-2xl p-4 flex items-center gap-3"
             >
-              <div className="w-9 h-9 rounded-full bg-[#14261F] flex items-center justify-center text-sm">
-                🐾
+              <div className="w-9 h-9 rounded-full bg-[#14261F] flex items-center justify-center">
+                <PawIcon className="w-4 h-4 text-[#E8A87C]" />
               </div>
               <div>
                 <p className="text-sm font-medium text-[#14261F]">{dog.name}</p>
@@ -270,6 +287,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
           ))}
         </div>
       </div>
+      <BottomNav slug={slug} />
     </div>
   );
 }

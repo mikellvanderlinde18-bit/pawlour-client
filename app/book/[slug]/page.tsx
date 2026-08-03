@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback, use } from "react";
 import { createClient } from "@/lib/supabase/client";
+import BottomNav from "@/components/BottomNav";
+import { PawIcon } from "@/components/icons";
 
 type Parlour = { id: string; name: string; subdomain: string; logo_url: string | null };
 type PriceRule = { id: string; attribute_type: string | null; attribute_value: string | null; price: number };
@@ -366,8 +368,19 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-[#14261F]/50">Loading…</p>
+      <div className="min-h-screen px-4 py-10 pb-28">
+        <div className="max-w-md mx-auto">
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 rounded-2xl skeleton mx-auto mb-3" />
+            <div className="h-6 w-40 rounded-lg skeleton mx-auto mb-2" />
+            <div className="h-4 w-52 rounded-lg skeleton mx-auto" />
+          </div>
+          <div className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-20 rounded-2xl skeleton" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -386,20 +399,14 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
   }
 
   return (
-    <div className="min-h-screen px-4 py-10">
+    <div className="min-h-screen px-4 py-10 pb-28">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-[#14261F] mx-auto mb-3 flex items-center justify-center text-2xl">
-            🐾
+          <div className="w-14 h-14 rounded-2xl bg-[#14261F] mx-auto mb-3 flex items-center justify-center">
+            <PawIcon className="w-7 h-7 text-[#E8A87C]" />
           </div>
           <h1 className="text-2xl font-semibold text-[#14261F]">{parlour.name}</h1>
           <p className="text-sm text-[#14261F]/50 mt-1">Book your dog&apos;s next groom</p>
-          <a
-            href={`/book/${slug}/account`}
-            className="inline-block text-xs text-[#14261F]/50 underline mt-2"
-          >
-            My account
-          </a>
         </div>
 
         {error && (
@@ -424,7 +431,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
         {/* Step: choose service */}
         {step === "service" && (
-          <div className="space-y-3">
+          <div className="space-y-3 step-enter" key="service">
             {services.length === 0 && (
               <p className="text-sm text-[#14261F]/50 italic text-center">
                 No services available yet — check back soon.
@@ -462,7 +469,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
         {/* Step: choose groomer */}
         {step === "groomer" && selectedService && (
-          <div>
+          <div className="step-enter" key="groomer">
             <button
               onClick={() => setStep("service")}
               className="text-xs text-[#14261F]/50 mb-4 hover:underline"
@@ -493,7 +500,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
         {/* Step: choose slot */}
         {step === "slot" && selectedService && (
-          <div>
+          <div className="step-enter" key="slot">
             <button
               onClick={() => setStep(selectedService.requires_groomer_selection ? "groomer" : "service")}
               className="text-xs text-[#14261F]/50 mb-4 hover:underline"
@@ -540,7 +547,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
         {/* Step: confirm — auth, client details, dog, then real submission */}
         {step === "confirm" && selectedSlot && selectedService && (
-          <div>
+          <div className="step-enter" key="confirm">
             {!bookingConfirmed && (
               <button
                 onClick={() => setStep("slot")}
@@ -769,6 +776,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           </div>
         )}
       </div>
+      <BottomNav slug={slug} />
     </div>
   );
 }
