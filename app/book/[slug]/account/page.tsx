@@ -264,13 +264,19 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
         </div>
 
         {/* Dogs */}
-        <p className="text-sm font-semibold text-[#14261F] mb-3">Your dogs</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-semibold text-[#14261F]">Your dogs</p>
+          <a href={`/book/${slug}/dogs/new`} className="text-xs text-[#D98F5F] font-medium underline">
+            + Add another dog
+          </a>
+        </div>
         <div className="space-y-2">
           {dogs.length === 0 && (
             <p className="text-sm text-[#14261F]/50 italic">No dogs added yet.</p>
           )}
           {dogs.map((dog) => (
-            <div
+            <a
+              href={`/book/${slug}/dogs/${dog.id}`}
               key={dog.id}
               className="bg-white border border-black/10 rounded-2xl p-4 flex items-center gap-3"
             >
@@ -288,7 +294,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
                   {[dog.breed, dog.size].filter(Boolean).join(" · ") || "No details yet"}
                 </p>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>
