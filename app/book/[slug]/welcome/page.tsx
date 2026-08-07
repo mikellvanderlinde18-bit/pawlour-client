@@ -160,6 +160,14 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
       setError(authErr.message);
       return;
     }
+
+    if (!data.session) {
+      setError(
+        "Check your email to confirm your account, then come back and sign in."
+      );
+      return;
+    }
+
     if (data.user) {
       setUserId(data.user.id);
       goNext();
@@ -169,14 +177,25 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
   async function handleSaveDetails(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!parlourId || !userId || !clientName.trim()) return;
+    if (!parlourId || !clientName.trim()) return;
     setSaving(true);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      setSaving(false);
+      setError("Your session expired — please sign in again.");
+      setStep("auth");
+      return;
+    }
 
     const { data, error: clientErr } = await supabase
       .from("client")
       .insert({
         parlour_id: parlourId,
-        auth_user_id: userId,
+        auth_user_id: session.user.id,
         name: clientName.trim(),
         phone: clientPhone.trim() || null,
       })
