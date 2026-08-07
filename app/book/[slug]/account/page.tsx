@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { PawIcon } from "@/components/icons";
 
 type Parlour = { id: string; name: string };
-type Dog = { id: string; name: string; breed: string | null; size: string | null };
+type Dog = { id: string; name: string; breed: string | null; size: string | null; photo_url: string | null };
 type Booking = {
   id: string;
   starts_at: string;
@@ -82,7 +82,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
       await Promise.all([
         supabase
           .from("dog")
-          .select("id, name, breed, size")
+          .select("id, name, breed, size, photo_url")
           .eq("client_id", clientRow.id)
           .order("name"),
         supabase
@@ -274,8 +274,13 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
               key={dog.id}
               className="bg-white border border-black/10 rounded-2xl p-4 flex items-center gap-3"
             >
-              <div className="w-9 h-9 rounded-full bg-[#14261F] flex items-center justify-center">
-                <PawIcon className="w-4 h-4 text-[#E8A87C]" />
+              <div className="w-9 h-9 rounded-full bg-[#14261F] flex items-center justify-center overflow-hidden flex-shrink-0">
+                {dog.photo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={dog.photo_url} alt={dog.name} className="w-full h-full object-cover" />
+                ) : (
+                  <PawIcon className="w-4 h-4 text-[#E8A87C]" />
+                )}
               </div>
               <div>
                 <p className="text-sm font-medium text-[#14261F]">{dog.name}</p>

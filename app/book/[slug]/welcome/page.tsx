@@ -54,6 +54,8 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
 
   // Dog fields
   const [dogName, setDogName] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [breed, setBreed] = useState("");
   const [size, setSize] = useState("");
   const [coatType, setCoatType] = useState("");
@@ -105,6 +107,31 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
       else next.add(tag);
       return next;
     });
+  }
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !userId) return;
+
+    setUploadingPhoto(true);
+    setError(null);
+
+    const ext = file.name.split(".").pop();
+    const path = `${userId}/${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("dog-photos")
+      .upload(path, file, { upsert: true });
+
+    if (uploadError) {
+      setUploadingPhoto(false);
+      setError(uploadError.message);
+      return;
+    }
+
+    const { data } = supabase.storage.from("dog-photos").getPublicUrl(path);
+    setPhotoUrl(data.publicUrl);
+    setUploadingPhoto(false);
   }
 
   function goNext() {
@@ -176,6 +203,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
     const { error: dogErr } = await supabase.from("dog").insert({
       client_id: clientId,
       name: dogName.trim(),
+      photo_url: photoUrl || null,
       breed: breed.trim() || null,
       size: size || null,
       coat_type: coatType || null,
@@ -298,6 +326,27 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
         {step === "basics" && (
           <div className="step-enter bg-white border border-black/10 rounded-2xl p-6 space-y-3">
             <p className="text-sm font-semibold text-[#14261F] mb-1">Now, the important part — your dog</p>
+            <div className="flex justify-center mb-2">
+              <label className="relative cursor-pointer">
+                <div className="w-20 h-20 rounded-full bg-[#FAF6EF] border-2 border-dashed border-black/15 flex items-center justify-center overflow-hidden">
+                  {uploadingPhoto ? (
+                    <span className="text-xs text-[#14261F]/40">…</span>
+                  ) : photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photoUrl} alt="Dog" className="w-full h-full object-cover" />
+                  ) : (
+                    <PawIcon className="w-7 h-7 text-[#14261F]/25" />
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <p className="text-xs text-[#14261F]/40 text-center -mt-1 mb-2">Tap to add a photo</p>
             <input type="text" value={dogName} onChange={(e) => setDogName(e.target.value)} placeholder="Dog's name" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]" />
             <input type="text" value={breed} onChange={(e) => setBreed(e.target.value)} placeholder="Breed" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]" />
             <div className="flex gap-2">
