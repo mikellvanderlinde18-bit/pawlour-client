@@ -142,6 +142,9 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
     const idx = STEPS.indexOf(step);
     setStep(STEPS[idx - 1]);
   }
+  function skipToFinish() {
+    handleFinish();
+  }
 
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
@@ -293,7 +296,8 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             </h1>
             <p className="text-sm text-[#14261F]/60 mb-8 leading-relaxed">
               Let&apos;s get your dog&apos;s profile set up — breed, style, personality, and
-              anything else we should know to take great care of them.
+              anything else we should know to take great care of them. Add as much or as
+              little as you like — you can always fill in more later.
             </p>
             <button
               onClick={() => setStep(userId ? "details" : "auth")}
@@ -379,6 +383,13 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <button onClick={goNext} className="w-full bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold">
               Continue
             </button>
+            <button
+              onClick={handleFinish}
+              disabled={saving || !dogName.trim()}
+              className="w-full text-[#14261F]/50 text-xs underline disabled:opacity-40"
+            >
+              {saving ? "Saving…" : "Skip the rest — just book me in"}
+            </button>
           </div>
         )}
 
@@ -399,6 +410,9 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
               <button onClick={goBack} className="flex-1 border border-black/15 text-[#14261F] rounded-full py-2.5 text-sm font-semibold">Back</button>
               <button onClick={goNext} className="flex-1 bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold">Continue</button>
             </div>
+            <button onClick={skipToFinish} disabled={saving} className="w-full text-[#14261F]/50 text-xs underline disabled:opacity-40">
+              Skip the rest — just book me in
+            </button>
           </div>
         )}
 
@@ -424,6 +438,9 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
               <button onClick={goBack} className="flex-1 border border-black/15 text-[#14261F] rounded-full py-2.5 text-sm font-semibold">Back</button>
               <button onClick={goNext} className="flex-1 bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold">Continue</button>
             </div>
+            <button onClick={skipToFinish} disabled={saving} className="w-full text-[#14261F]/50 text-xs underline disabled:opacity-40">
+              Skip the rest — just book me in
+            </button>
           </div>
         )}
 
@@ -445,6 +462,9 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
               <button onClick={goBack} className="flex-1 border border-black/15 text-[#14261F] rounded-full py-2.5 text-sm font-semibold">Back</button>
               <button onClick={goNext} className="flex-1 bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold">Continue</button>
             </div>
+            <button onClick={skipToFinish} disabled={saving} className="w-full text-[#14261F]/50 text-xs underline disabled:opacity-40">
+              Skip the rest — just book me in
+            </button>
           </div>
         )}
 
