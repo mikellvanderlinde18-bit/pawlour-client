@@ -677,6 +677,14 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                 >
                   {authLoading ? "…" : authMode === "signup" ? "Continue" : "Sign in"}
                 </button>
+                {authMode === "login" && (
+                  <a
+                    href={`/forgot-password?slug=${encodeURIComponent(slug)}`}
+                    className="block text-center text-xs text-[#14261F]/50 underline"
+                  >
+                    Forgot your password?
+                  </a>
+                )}
               </form>
             ) : !clientRecord ? (
               <form

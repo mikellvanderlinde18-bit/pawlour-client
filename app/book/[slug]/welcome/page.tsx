@@ -332,6 +332,14 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <button type="submit" disabled={saving} className="w-full bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50">
               {saving ? "…" : "Continue"}
             </button>
+            {authMode === "login" && (
+              <a
+                href={`/forgot-password?slug=${encodeURIComponent(slug)}`}
+                className="block text-center text-xs text-[#14261F]/50 underline"
+              >
+                Forgot your password?
+              </a>
+            )}
           </form>
         )}
 
