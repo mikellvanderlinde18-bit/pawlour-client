@@ -399,8 +399,8 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     return (
       <div className="min-h-screen flex items-center justify-center px-4 text-center">
         <div>
-          <h1 className="text-xl font-semibold text-[#14261F] mb-2">Parlour not found</h1>
-          <p className="text-sm text-[#14261F]/60">Double-check the link your parlour gave you.</p>
+          <h1 className="text-xl font-semibold text-[#1A1A1A] mb-2">Parlour not found</h1>
+          <p className="text-sm text-[#1A1A1A]/60">Double-check the link your parlour gave you.</p>
         </div>
       </div>
     );
@@ -409,24 +409,24 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
   return (
     <div className="min-h-screen px-4 py-10 pb-28">
       <div className="max-w-md mx-auto">
-        <div className="text-center mb-8">
+        <div className="text-center mb-10">
           <div
-            className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center overflow-hidden"
+            className="w-11 h-11 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden"
             style={{ backgroundColor: brand.primaryColor }}
           >
             {brand.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={brand.logoUrl} alt={parlour.name} className="w-full h-full object-cover" />
             ) : (
-              <PawIcon className="w-7 h-7" style={{ color: brand.accentColor }} />
+              <PawIcon className="w-5 h-5" style={{ color: brand.accentColor }} />
             )}
           </div>
-          <h1 className="text-2xl font-semibold text-[#14261F]">{parlour.name}</h1>
-          <p className="text-sm text-[#14261F]/50 mt-1">Book your dog&apos;s next groom</p>
+          <h1 className="text-[19px] font-medium text-[#1A1A1A] tracking-[-0.01em]">{parlour.name}</h1>
+          <p className="eyebrow mt-2">Book your next groom</p>
           {!userId && (
             <a
               href={`/book/${slug}/welcome`}
-              className="inline-block text-xs font-medium underline mt-2"
+              className="inline-block text-xs font-medium underline mt-3"
               style={{ color: brand.accentColor }}
             >
               New here? Set up your dog&apos;s profile
@@ -456,57 +456,61 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         </div>
 
         {step === "service" && (
-          <div className="space-y-3 step-enter" key="service">
+          <div className="step-enter" key="service">
             {services.length === 0 && (
-              <p className="text-sm text-[#14261F]/50 italic text-center">
+              <p className="text-sm text-[#1A1A1A]/50 italic text-center">
                 No services available yet — check back soon.
               </p>
             )}
-            {services.map((service) => {
-              const flat = service.price_rule.find((r) => !r.attribute_type);
-              const range = service.price_rule.filter((r) => r.attribute_type);
-              return (
-                <button
-                  key={service.id}
-                  onClick={() => handleSelectService(service)}
-                  className="w-full bg-white border border-black/10 rounded-2xl p-4 text-left hover:border-black/30 transition-colors"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-semibold text-[#14261F]">{service.name}</div>
-                      <div className="text-xs text-[#14261F]/50">{service.duration_minutes} min</div>
-                    </div>
-                    <div className="text-sm font-semibold" style={{ color: brand.accentColor }}>
-                      {flat
-                        ? `R${Number(flat.price).toFixed(0)}`
-                        : range.length > 0
-                        ? `from R${Math.min(...range.map((r) => Number(r.price))).toFixed(0)}`
-                        : ""}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+            {services.length > 0 && (
+              <div className="bg-white rounded-2xl overflow-hidden">
+                {services.map((service, i) => {
+                  const flat = service.price_rule.find((r) => !r.attribute_type);
+                  const range = service.price_rule.filter((r) => r.attribute_type);
+                  return (
+                    <button
+                      key={service.id}
+                      onClick={() => handleSelectService(service)}
+                      className={`w-full px-5 py-4 text-left flex justify-between items-baseline hover:bg-black/[0.02] transition-colors ${
+                        i > 0 ? "hairline-t" : ""
+                      }`}
+                    >
+                      <div>
+                        <div className="text-[15px] text-[#1A1A1A]">{service.name}</div>
+                        <div className="text-xs text-[#1A1A1A]/40 mt-0.5">{service.duration_minutes} min</div>
+                      </div>
+                      <div className="text-sm" style={{ color: brand.accentColor }}>
+                        {flat
+                          ? `R${Number(flat.price).toFixed(0)}`
+                          : range.length > 0
+                          ? `from R${Math.min(...range.map((r) => Number(r.price))).toFixed(0)}`
+                          : ""}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
         {step === "groomer" && selectedService && (
           <div className="step-enter" key="groomer">
-            <button onClick={() => setStep("service")} className="text-xs text-[#14261F]/50 mb-4 hover:underline">
+            <button onClick={() => setStep("service")} className="text-xs text-[#1A1A1A]/50 mb-4 hover:underline">
               ← Back
             </button>
-            <p className="text-sm text-[#14261F]/70 mb-4">
+            <p className="text-sm text-[#1A1A1A]/70 mb-4">
               Who would you like for <strong>{selectedService.name}</strong>?
             </p>
             <div className="space-y-2">
               {groomers.length === 0 && (
-                <p className="text-sm text-[#14261F]/50 italic">No groomer available for this service yet.</p>
+                <p className="text-sm text-[#1A1A1A]/50 italic">No groomer available for this service yet.</p>
               )}
               {groomers.map((groomer) => (
                 <button
                   key={groomer.id}
                   onClick={() => handleSelectGroomer(groomer)}
-                  className="w-full bg-white border border-black/10 rounded-2xl p-4 text-left font-medium text-[#14261F] hover:border-black/30 transition-colors"
+                  className="w-full bg-white border border-black/10 rounded-2xl p-4 text-left font-medium text-[#1A1A1A] hover:border-black/30 transition-colors"
                 >
                   {groomer.name}
                 </button>
@@ -519,7 +523,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           <div className="step-enter" key="slot">
             <button
               onClick={() => setStep(selectedService.requires_groomer_selection ? "groomer" : "service")}
-              className="text-xs text-[#14261F]/50 mb-4 hover:underline"
+              className="text-xs text-[#1A1A1A]/50 mb-4 hover:underline"
             >
               ← Back
             </button>
@@ -535,9 +539,9 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
               onChangeMonth={(year, month) => setCalendarMonth({ year, month })}
             />
             {checkingSlots ? (
-              <p className="text-sm text-[#14261F]/50">Checking availability…</p>
+              <p className="text-sm text-[#1A1A1A]/50">Checking availability…</p>
             ) : slots.length === 0 ? (
-              <p className="text-sm text-[#14261F]/50 italic">No slots available this date — try another day.</p>
+              <p className="text-sm text-[#1A1A1A]/50 italic">No slots available this date — try another day.</p>
             ) : (
               <div className="grid grid-cols-3 gap-2 mb-4">
                 {slots.map((slot) => (
@@ -547,7 +551,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                       setSelectedSlot(slot);
                       setStep("confirm");
                     }}
-                    className="bg-white border border-black/15 rounded-lg text-center py-2.5 text-sm text-[#14261F] hover:border-black/40"
+                    className="bg-white border border-black/15 rounded-lg text-center py-2.5 text-sm text-[#1A1A1A] hover:border-black/40"
                   >
                     {new Date(slot.slot_start).toLocaleTimeString("en-ZA", {
                       hour: "2-digit",
@@ -564,25 +568,25 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         {step === "confirm" && selectedSlot && selectedService && (
           <div className="step-enter" key="confirm">
             {!bookingConfirmed && (
-              <button onClick={() => setStep("slot")} className="text-xs text-[#14261F]/50 mb-4 hover:underline">
+              <button onClick={() => setStep("slot")} className="text-xs text-[#1A1A1A]/50 mb-4 hover:underline">
                 ← Back
               </button>
             )}
 
             <div className="bg-white border border-black/10 rounded-2xl p-5 space-y-3 mb-4">
               <div className="flex justify-between text-sm">
-                <span className="text-[#14261F]/50">Service</span>
-                <span className="font-medium text-[#14261F]">{selectedService.name}</span>
+                <span className="text-[#1A1A1A]/50">Service</span>
+                <span className="font-medium text-[#1A1A1A]">{selectedService.name}</span>
               </div>
               {selectedGroomer && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#14261F]/50">Groomer</span>
-                  <span className="font-medium text-[#14261F]">{selectedGroomer.name}</span>
+                  <span className="text-[#1A1A1A]/50">Groomer</span>
+                  <span className="font-medium text-[#1A1A1A]">{selectedGroomer.name}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-[#14261F]/50">Date &amp; time</span>
-                <span className="font-medium text-[#14261F]">
+                <span className="text-[#1A1A1A]/50">Date &amp; time</span>
+                <span className="font-medium text-[#1A1A1A]">
                   {new Date(selectedSlot.slot_start).toLocaleString("en-ZA", {
                     weekday: "short",
                     day: "numeric",
@@ -595,8 +599,8 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
               </div>
               {resolvedRule && (
                 <div className="flex justify-between text-sm pt-3 border-t border-black/10">
-                  <span className="text-[#14261F]/50">Price</span>
-                  <span className="font-semibold text-[#14261F]">R{Number(resolvedRule.price).toFixed(2)}</span>
+                  <span className="text-[#1A1A1A]/50">Price</span>
+                  <span className="font-semibold text-[#1A1A1A]">R{Number(resolvedRule.price).toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -604,13 +608,13 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
             {bookingConfirmed ? (
               <div className="bg-white border border-black/10 rounded-2xl p-6 text-center">
                 <div className="text-2xl mb-2">🎉</div>
-                <p className="font-semibold text-[#14261F] mb-1">Booking confirmed!</p>
-                <p className="text-sm text-[#14261F]/60">
+                <p className="font-semibold text-[#1A1A1A] mb-1">Booking confirmed!</p>
+                <p className="text-sm text-[#1A1A1A]/60">
                   See you then — {parlour.name} will be ready for {selectedDog?.name ?? "your dog"}.
                 </p>
               </div>
             ) : !authChecked ? (
-              <p className="text-sm text-[#14261F]/50">Loading…</p>
+              <p className="text-sm text-[#1A1A1A]/50">Loading…</p>
             ) : !userId ? (
               <form onSubmit={handleAuth} className="bg-white border border-black/10 rounded-2xl p-5 space-y-3">
                 <div className="flex gap-2 mb-2">
@@ -621,7 +625,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                     style={
                       authMode === "signup"
                         ? { backgroundColor: brand.primaryColor, color: "#fff", borderColor: brand.primaryColor }
-                        : { borderColor: "rgba(0,0,0,0.15)", color: "#14261F" }
+                        : { borderColor: "rgba(0,0,0,0.15)", color: "#1A1A1A" }
                     }
                   >
                     New client
@@ -633,7 +637,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                     style={
                       authMode === "login"
                         ? { backgroundColor: brand.primaryColor, color: "#fff", borderColor: brand.primaryColor }
-                        : { borderColor: "rgba(0,0,0,0.15)", color: "#14261F" }
+                        : { borderColor: "rgba(0,0,0,0.15)", color: "#1A1A1A" }
                     }
                   >
                     I&apos;ve booked here before
@@ -650,7 +654,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                   value={authEmail}
                   onChange={(e) => setAuthEmail(e.target.value)}
                   placeholder="Email"
-                  className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+                  className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
                 />
                 <input
                   type="password"
@@ -659,7 +663,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                   value={authPassword}
                   onChange={(e) => setAuthPassword(e.target.value)}
                   placeholder="Password"
-                  className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+                  className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
                 />
                 <button
                   type="submit"
@@ -672,7 +676,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                 {authMode === "login" && (
                   <a
                     href={`/forgot-password?slug=${encodeURIComponent(slug)}`}
-                    className="block text-center text-xs text-[#14261F]/50 underline"
+                    className="block text-center text-xs text-[#1A1A1A]/50 underline"
                   >
                     Forgot your password?
                   </a>
@@ -683,21 +687,21 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                 onSubmit={handleCreateClientRecord}
                 className="bg-white border border-black/10 rounded-2xl p-5 space-y-3"
               >
-                <p className="text-sm text-[#14261F]/70 mb-1">Just a couple of details:</p>
+                <p className="text-sm text-[#1A1A1A]/70 mb-1">Just a couple of details:</p>
                 <input
                   type="text"
                   required
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+                  className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
                 />
                 <input
                   type="tel"
                   value={clientPhone}
                   onChange={(e) => setClientPhone(e.target.value)}
                   placeholder="Phone number"
-                  className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+                  className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
                 />
                 <button
                   type="submit"
@@ -715,12 +719,12 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                   </div>
                 )}
                 <div className="bg-white border border-black/10 rounded-2xl p-5 space-y-3">
-                  <p className="text-sm text-[#14261F]/70">Which dog?</p>
+                  <p className="text-sm text-[#1A1A1A]/70">Which dog?</p>
                   {dogs.length > 0 && (
                     <select
                       value={dogId}
                       onChange={(e) => setDogId(e.target.value)}
-                      className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+                      className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
                     >
                       <option value="">Select a dog…</option>
                       {dogs.map((d) => (
@@ -736,21 +740,21 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                       value={newDogName}
                       onChange={(e) => setNewDogName(e.target.value)}
                       placeholder="New dog's name"
-                      className="flex-1 rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+                      className="flex-1 rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
                     />
                     <input
                       type="text"
                       value={newDogSize}
                       onChange={(e) => setNewDogSize(e.target.value)}
                       placeholder="Size"
-                      className="w-24 rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+                      className="w-24 rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
                     />
                     <input
                       type="text"
                       value={newDogCoat}
                       onChange={(e) => setNewDogCoat(e.target.value)}
                       placeholder="Coat"
-                      className="w-24 rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+                      className="w-24 rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
                     />
                     <button
                       type="submit"
@@ -764,13 +768,13 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
                 {dogId && attributeRules.length > 0 && !autoMatchedRule && !flatPrice && (
                   <div className="bg-white border border-black/10 rounded-2xl p-5">
-                    <p className="text-xs text-[#14261F]/50 italic mb-2">
+                    <p className="text-xs text-[#1A1A1A]/50 italic mb-2">
                       Couldn&apos;t match your dog&apos;s size automatically — pick a price:
                     </p>
                     <select
                       value={manualPriceRuleId}
                       onChange={(e) => setManualPriceRuleId(e.target.value)}
-                      className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+                      className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
                     >
                       <option value="">Select…</option>
                       {attributeRules.map((r) => (
@@ -851,21 +855,21 @@ function MiniCalendar({
   return (
     <div className="bg-white border border-black/10 rounded-2xl p-4 mb-4">
       <div className="flex items-center justify-between mb-3">
-        <button type="button" onClick={goPrevMonth} className="text-[#14261F]/50 hover:text-[#14261F] px-2">
+        <button type="button" onClick={goPrevMonth} className="text-[#1A1A1A]/50 hover:text-[#1A1A1A] px-2">
           ‹
         </button>
-        <div className="text-sm font-semibold text-[#14261F]">
+        <div className="text-sm font-semibold text-[#1A1A1A]">
           {monthLabel}
-          {loading && <span className="text-[#14261F]/40 font-normal"> · loading…</span>}
+          {loading && <span className="text-[#1A1A1A]/40 font-normal"> · loading…</span>}
         </div>
-        <button type="button" onClick={goNextMonth} className="text-[#14261F]/50 hover:text-[#14261F] px-2">
+        <button type="button" onClick={goNextMonth} className="text-[#1A1A1A]/50 hover:text-[#1A1A1A] px-2">
           ›
         </button>
       </div>
 
       <div className="grid grid-cols-7 gap-1 mb-1">
         {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-          <div key={i} className="text-center text-[10px] text-[#14261F]/40 font-medium">
+          <div key={i} className="text-center text-[10px] text-[#1A1A1A]/40 font-medium">
             {d}
           </div>
         ))}
@@ -890,7 +894,7 @@ function MiniCalendar({
                 isSelected
                   ? { backgroundColor: primaryColor, color: "#fff" }
                   : isAvailable
-                  ? { color: "#14261F", border: "1px solid rgba(0,0,0,0.1)" }
+                  ? { color: "#1A1A1A", border: "1px solid rgba(0,0,0,0.1)" }
                   : { color: "rgba(20,38,31,0.25)" }
               }
             >

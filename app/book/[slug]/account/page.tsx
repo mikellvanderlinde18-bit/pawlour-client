@@ -135,7 +135,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
   if (!parlour) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 text-center">
-        <p className="text-sm text-[#14261F]/60">Parlour not found.</p>
+        <p className="text-sm text-[#1A1A1A]/60">Parlour not found.</p>
       </div>
     );
   }
@@ -144,7 +144,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
     return (
       <div className="min-h-screen flex items-center justify-center px-4 text-center pb-28">
         <div>
-          <p className="text-sm text-[#14261F]/60 mb-4">Sign in to see your bookings and dogs.</p>
+          <p className="text-sm text-[#1A1A1A]/60 mb-4">Sign in to see your bookings and dogs.</p>
           <a
             href={`/book/${slug}`}
             className="inline-block rounded-full px-5 py-2.5 text-sm font-semibold text-white"
@@ -170,10 +170,10 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
       <div className="max-w-md mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-xl font-semibold text-[#14261F]">{parlour.name}</h1>
-            <p className="text-xs text-[#14261F]/50">Your account</p>
+            <h1 className="text-xl font-semibold text-[#1A1A1A]">{parlour.name}</h1>
+            <p className="text-xs text-[#1A1A1A]/50">Your account</p>
           </div>
-          <button onClick={handleSignOut} className="text-xs text-[#14261F]/50 hover:underline">
+          <button onClick={handleSignOut} className="text-xs text-[#1A1A1A]/50 hover:underline">
             Sign out
           </button>
         </div>
@@ -188,14 +188,14 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
 
         {rewardRule && (
           <div className="bg-white border border-black/10 rounded-2xl p-5 mb-6">
-            <p className="text-sm font-semibold text-[#14261F] mb-2">Rewards</p>
+            <p className="text-sm font-semibold text-[#1A1A1A] mb-2">Rewards</p>
             {rewardLedger?.reward_available ? (
               <p className="text-sm font-medium" style={{ color: brand.accentColor }}>
                 🎉 You&apos;ve earned a reward — it&apos;ll apply to your next visit.
               </p>
             ) : (
               <>
-                <div className="h-2 bg-[#FAF6EF] rounded-full overflow-hidden mb-2">
+                <div className="h-2 bg-[#FAFAF8] rounded-full overflow-hidden mb-2">
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -204,7 +204,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
                     }}
                   />
                 </div>
-                <p className="text-xs text-[#14261F]/60">
+                <p className="text-xs text-[#1A1A1A]/60">
                   {rewardRule.trigger_type === "visit_count"
                     ? `${progress} of ${rewardRule.threshold} visits`
                     : `R${progress.toFixed(0)} of R${rewardRule.threshold} spent`}
@@ -214,20 +214,22 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
           </div>
         )}
 
-        <p className="text-sm font-semibold text-[#14261F] mb-3">Upcoming bookings</p>
-        <div className="space-y-2 mb-6">
-          {bookings.length === 0 && <p className="text-sm text-[#14261F]/50 italic">No upcoming bookings.</p>}
-          {bookings.map((b) => (
-            <div key={b.id} className="bg-white border border-black/10 rounded-2xl p-4">
-              <div className="flex justify-between items-start mb-1">
-                <span className="font-medium text-[#14261F] text-sm">
+        <p className="eyebrow mb-3">Upcoming bookings</p>
+        <div className="bg-white rounded-2xl overflow-hidden mb-8">
+          {bookings.length === 0 && (
+            <p className="text-sm text-[#1A1A1A]/40 italic px-5 py-4">No upcoming bookings.</p>
+          )}
+          {bookings.map((b, i) => (
+            <div key={b.id} className={`px-5 py-4 ${i > 0 ? "hairline-t" : ""}`}>
+              <div className="flex justify-between items-baseline mb-1">
+                <span className="text-[15px] text-[#1A1A1A]">
                   {b.service?.name ?? "Service"} — {b.dog?.name ?? "Dog"}
                 </span>
-                <span className="text-sm font-semibold" style={{ color: brand.accentColor }}>
+                <span className="text-sm" style={{ color: brand.accentColor }}>
                   R{Number(b.price).toFixed(2)}
                 </span>
               </div>
-              <p className="text-xs text-[#14261F]/50">
+              <p className="text-xs text-[#1A1A1A]/40">
                 {new Date(b.starts_at).toLocaleString("en-ZA", {
                   weekday: "short",
                   day: "numeric",
@@ -243,7 +245,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
         </div>
 
         <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-semibold text-[#14261F]">Your dogs</p>
+          <p className="eyebrow">Your dogs</p>
           <a
             href={`/book/${slug}/dogs/new`}
             className="text-xs font-medium underline"
@@ -252,13 +254,15 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
             + Add another dog
           </a>
         </div>
-        <div className="space-y-2">
-          {dogs.length === 0 && <p className="text-sm text-[#14261F]/50 italic">No dogs added yet.</p>}
-          {dogs.map((dog) => (
+        <div className="bg-white rounded-2xl overflow-hidden">
+          {dogs.length === 0 && (
+            <p className="text-sm text-[#1A1A1A]/40 italic px-5 py-4">No dogs added yet.</p>
+          )}
+          {dogs.map((dog, i) => (
             <a
               href={`/book/${slug}/dogs/${dog.id}`}
               key={dog.id}
-              className="bg-white border border-black/10 rounded-2xl p-4 flex items-center gap-3"
+              className={`px-5 py-4 flex items-center gap-3 hover:bg-black/[0.02] transition-colors ${i > 0 ? "hairline-t" : ""}`}
             >
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0"
@@ -272,8 +276,8 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-[#14261F]">{dog.name}</p>
-                <p className="text-xs text-[#14261F]/50">
+                <p className="text-sm text-[#1A1A1A]">{dog.name}</p>
+                <p className="text-xs text-[#1A1A1A]/40">
                   {[dog.breed, dog.size].filter(Boolean).join(" · ") || "No details yet"}
                 </p>
               </div>

@@ -74,15 +74,15 @@ export default function OffersPage({ params }: { params: Promise<{ slug: string 
   return (
     <div className="min-h-screen px-4 py-10 pb-28">
       <div className="max-w-md mx-auto">
-        <h1 className="text-xl font-semibold text-[#14261F] mb-1">{parlour?.name ?? "Offers"}</h1>
-        <p className="text-sm text-[#14261F]/50 mb-8">Current deals and specials</p>
+        <h1 className="text-xl font-semibold text-[#1A1A1A] mb-1">{parlour?.name ?? "Offers"}</h1>
+        <p className="text-sm text-[#1A1A1A]/50 mb-8">Current deals and specials</p>
 
         {offers.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-14 h-14 rounded-2xl bg-white border border-black/10 mx-auto mb-3 flex items-center justify-center">
-              <GiftIcon className="w-6 h-6 text-[#14261F]/30" />
+              <GiftIcon className="w-6 h-6 text-[#1A1A1A]/30" />
             </div>
-            <p className="text-sm text-[#14261F]/50">No offers right now — check back soon.</p>
+            <p className="text-sm text-[#1A1A1A]/50">No offers right now — check back soon.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -97,14 +97,14 @@ export default function OffersPage({ params }: { params: Promise<{ slug: string 
                   </div>
                 )}
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#FAF6EF] flex items-center justify-center flex-shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-[#FAFAF8] flex items-center justify-center flex-shrink-0">
                     <GiftIcon className="w-4 h-4" style={{ color: brand.accentColor }} />
                   </div>
                   <div>
-                    <p className="font-semibold text-[#14261F] mb-1">{offer.title}</p>
-                    {offer.description && <p className="text-sm text-[#14261F]/60">{offer.description}</p>}
+                    <p className="font-semibold text-[#1A1A1A] mb-1">{offer.title}</p>
+                    {offer.description && <p className="text-sm text-[#1A1A1A]/60">{offer.description}</p>}
                     {offer.ends_at && (
-                      <p className="text-xs text-[#14261F]/40 mt-2">
+                      <p className="text-xs text-[#1A1A1A]/40 mt-2">
                         Ends{" "}
                         {new Date(offer.ends_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })}
                       </p>

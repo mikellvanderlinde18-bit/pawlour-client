@@ -41,21 +41,21 @@ function ResetPasswordForm() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-xl font-semibold text-[#14261F]">Set a new password</h1>
+          <h1 className="text-xl font-semibold text-[#1A1A1A]">Set a new password</h1>
         </div>
 
         {done ? (
           <div className="bg-white border border-black/10 rounded-2xl p-6 text-center">
-            <p className="text-sm text-[#14261F] mb-4">Your password has been updated.</p>
+            <p className="text-sm text-[#1A1A1A] mb-4">Your password has been updated.</p>
             <a
               href={returnSlug ? `/book/${returnSlug}` : "/"}
-              className="inline-block bg-[#14261F] text-[#FAF6EF] rounded-full px-5 py-2.5 text-sm font-semibold"
+              className="inline-block bg-[#1A1A1A] text-[#FAF6EF] rounded-full px-5 py-2.5 text-sm font-semibold"
             >
               Continue
             </a>
           </div>
         ) : !ready ? (
-          <p className="text-sm text-[#14261F]/50 text-center">Loading…</p>
+          <p className="text-sm text-[#1A1A1A]/50 text-center">Loading…</p>
         ) : (
           <form onSubmit={handleSubmit} className="bg-white border border-black/10 rounded-2xl p-6 space-y-3">
             {error && (
@@ -68,12 +68,12 @@ function ResetPasswordForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="New password"
-              className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+              className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
             />
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
+              className="w-full bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
             >
               {saving ? "Saving…" : "Update password"}
             </button>

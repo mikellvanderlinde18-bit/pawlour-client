@@ -38,13 +38,13 @@ function ForgotPasswordForm() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-xl font-semibold text-[#14261F]">Reset your password</h1>
-          <p className="text-sm text-[#14261F]/60 mt-1">We&apos;ll email you a link to set a new one.</p>
+          <h1 className="text-xl font-semibold text-[#1A1A1A]">Reset your password</h1>
+          <p className="text-sm text-[#1A1A1A]/60 mt-1">We&apos;ll email you a link to set a new one.</p>
         </div>
 
         {sent ? (
           <div className="bg-white border border-black/10 rounded-2xl p-6 text-center">
-            <p className="text-sm text-[#14261F]">Check your email for a link to reset your password.</p>
+            <p className="text-sm text-[#1A1A1A]">Check your email for a link to reset your password.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="bg-white border border-black/10 rounded-2xl p-6 space-y-3">
@@ -57,12 +57,12 @@ function ForgotPasswordForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Your email"
-              className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]"
+              className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]"
             />
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
+              className="w-full bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
             >
               {loading ? "Sending…" : "Send reset link"}
             </button>
@@ -70,7 +70,7 @@ function ForgotPasswordForm() {
         )}
 
         {returnSlug && (
-          <a href={`/book/${returnSlug}`} className="block text-center text-xs text-[#14261F]/50 underline mt-6">
+          <a href={`/book/${returnSlug}`} className="block text-center text-xs text-[#1A1A1A]/50 underline mt-6">
             ← Back to booking
           </a>
         )}

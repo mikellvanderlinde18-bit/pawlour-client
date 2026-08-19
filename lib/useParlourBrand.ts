@@ -10,8 +10,8 @@ export type ParlourBrand = {
 };
 
 const DEFAULT_BRAND: ParlourBrand = {
-  primaryColor: "#14261F",
-  accentColor: "#D98F5F",
+  primaryColor: "#1A1A1A",
+  accentColor: "#8A8A85",
   logoUrl: null,
 };
 
