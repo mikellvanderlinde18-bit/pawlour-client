@@ -3,6 +3,8 @@
 :root {
   --background: #FAF6EF;
   --foreground: #14261F;
+  --brand-primary: #14261F;
+  --brand-accent: #D98F5F;
 }
 
 @theme inline {
@@ -22,12 +24,8 @@ body {
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .skeleton {
@@ -37,14 +35,8 @@ body {
 }
 
 @keyframes stepIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .step-enter {

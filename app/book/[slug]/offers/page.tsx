@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, use } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useParlourBrand } from "@/lib/useParlourBrand";
 import BottomNav from "@/components/BottomNav";
 import { GiftIcon } from "@/components/icons";
 
@@ -11,13 +12,13 @@ type Offer = {
   title: string;
   description: string | null;
   discount_percent: number | null;
-  starts_at: string | null;
   ends_at: string | null;
 };
 
 export default function OffersPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const supabase = createClient();
+  const brand = useParlourBrand(slug);
 
   const [parlour, setParlour] = useState<Parlour | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -42,7 +43,7 @@ export default function OffersPage({ params }: { params: Promise<{ slug: string 
 
     const { data: offerRows } = await supabase
       .from("offer")
-      .select("id, title, description, discount_percent, starts_at, ends_at")
+      .select("id, title, description, discount_percent, ends_at")
       .eq("parlour_id", parlourRow.id)
       .or(`ends_at.is.null,ends_at.gte.${today}`)
       .order("created_at", { ascending: false });
@@ -73,9 +74,7 @@ export default function OffersPage({ params }: { params: Promise<{ slug: string 
   return (
     <div className="min-h-screen px-4 py-10 pb-28">
       <div className="max-w-md mx-auto">
-        <h1 className="text-xl font-semibold text-[#14261F] mb-1">
-          {parlour?.name ?? "Offers"}
-        </h1>
+        <h1 className="text-xl font-semibold text-[#14261F] mb-1">{parlour?.name ?? "Offers"}</h1>
         <p className="text-sm text-[#14261F]/50 mb-8">Current deals and specials</p>
 
         {offers.length === 0 ? (
@@ -88,31 +87,26 @@ export default function OffersPage({ params }: { params: Promise<{ slug: string 
         ) : (
           <div className="space-y-3">
             {offers.map((offer) => (
-              <div
-                key={offer.id}
-                className="bg-white border border-black/10 rounded-2xl p-5 relative overflow-hidden"
-              >
+              <div key={offer.id} className="bg-white border border-black/10 rounded-2xl p-5 relative overflow-hidden">
                 {offer.discount_percent && (
-                  <div className="absolute top-0 right-0 bg-[#D98F5F] text-white text-xs font-semibold px-3 py-1.5 rounded-bl-xl">
+                  <div
+                    className="absolute top-0 right-0 text-white text-xs font-semibold px-3 py-1.5 rounded-bl-xl"
+                    style={{ backgroundColor: brand.accentColor }}
+                  >
                     {Number(offer.discount_percent)}% off
                   </div>
                 )}
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-full bg-[#FAF6EF] flex items-center justify-center flex-shrink-0">
-                    <GiftIcon className="w-4 h-4 text-[#D98F5F]" />
+                    <GiftIcon className="w-4 h-4" style={{ color: brand.accentColor }} />
                   </div>
                   <div>
                     <p className="font-semibold text-[#14261F] mb-1">{offer.title}</p>
-                    {offer.description && (
-                      <p className="text-sm text-[#14261F]/60">{offer.description}</p>
-                    )}
+                    {offer.description && <p className="text-sm text-[#14261F]/60">{offer.description}</p>}
                     {offer.ends_at && (
                       <p className="text-xs text-[#14261F]/40 mt-2">
                         Ends{" "}
-                        {new Date(offer.ends_at).toLocaleDateString("en-ZA", {
-                          day: "numeric",
-                          month: "short",
-                        })}
+                        {new Date(offer.ends_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })}
                       </p>
                     )}
                   </div>
@@ -122,7 +116,7 @@ export default function OffersPage({ params }: { params: Promise<{ slug: string 
           </div>
         )}
       </div>
-      <BottomNav slug={slug} />
+      <BottomNav slug={slug} primaryColor={brand.primaryColor} />
     </div>
   );
 }

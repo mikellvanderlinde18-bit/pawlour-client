@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, use } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useParlourBrand } from "@/lib/useParlourBrand";
 import BottomNav from "@/components/BottomNav";
 import { PawIcon } from "@/components/icons";
 
@@ -24,8 +24,8 @@ type Dog = { id: string; name: string; size: string | null; coat_type: string | 
 
 export default function BookingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
-  const router = useRouter();
   const supabase = createClient();
+  const brand = useParlourBrand(slug);
 
   const [parlour, setParlour] = useState<Parlour | null>(null);
   const [services, setServices] = useState<Service[]>([]);
@@ -43,12 +43,11 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date();
-    return { year: d.getFullYear(), month: d.getMonth() }; // month is 0-indexed
+    return { year: d.getFullYear(), month: d.getMonth() };
   });
   const [availableDays, setAvailableDays] = useState<Set<string>>(new Set());
   const [loadingMonth, setLoadingMonth] = useState(false);
 
-  // Auth + client account state
   const [userId, setUserId] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
@@ -90,7 +89,9 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
 
     const { data: serviceRows } = await supabase
       .from("service")
-      .select("id, name, description, duration_minutes, requires_groomer_selection, concurrent_capacity, price_rule(id, attribute_type, attribute_value, price)")
+      .select(
+        "id, name, description, duration_minutes, requires_groomer_selection, concurrent_capacity, price_rule(id, attribute_type, attribute_value, price)"
+      )
       .eq("parlour_id", parlourRow.id)
       .eq("active", true)
       .order("name");
@@ -122,10 +123,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         .eq("auth_user_id", userId)
         .maybeSingle();
 
-      if (!existing) {
-        router.push(`/book/${slug}/welcome`);
-        return;
-      }
+      if (!existing) return;
 
       setClientRecord(existing);
       const { data: dogRows } = await supabase
@@ -133,15 +131,9 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
         .select("id, name, size, coat_type")
         .eq("client_id", existing.id)
         .order("name");
-
-      if (!dogRows || dogRows.length === 0) {
-        router.push(`/book/${slug}/welcome`);
-        return;
-      }
-
-      setDogs(dogRows);
+      setDogs(dogRows ?? []);
     })();
-  }, [userId, parlour, supabase, router, slug]);
+  }, [userId, parlour, supabase]);
 
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
@@ -160,18 +152,33 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
       setAuthError(authErr.message);
       return;
     }
+
+    if (!data.session) {
+      setAuthError("Check your email to confirm your account, then come back and sign in.");
+      return;
+    }
+
     if (data.user) setUserId(data.user.id);
   }
 
   async function handleCreateClientRecord(e: React.FormEvent) {
     e.preventDefault();
-    if (!parlour || !userId || !clientName.trim()) return;
+    if (!parlour || !clientName.trim()) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      setError("Your session expired — please sign in again.");
+      return;
+    }
 
     const { data, error: clientErr } = await supabase
       .from("client")
       .insert({
         parlour_id: parlour.id,
-        auth_user_id: userId,
+        auth_user_id: session.user.id,
         name: clientName.trim(),
         phone: clientPhone.trim() || null,
       })
@@ -184,6 +191,118 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     }
     setClientRecord(data);
   }
+
+  async function handleSelectService(service: Service) {
+    setSelectedService(service);
+    setError(null);
+
+    if (!service.requires_groomer_selection) {
+      setSelectedGroomer(null);
+      setStep("slot");
+      return;
+    }
+
+    const { data: groomerLinks } = await supabase
+      .from("groomer_service")
+      .select("groomer:groomer_id(id, name)")
+      .eq("service_id", service.id);
+
+    const linkedGroomers = ((groomerLinks ?? []) as unknown as { groomer: Groomer }[]).map(
+      (g) => g.groomer
+    );
+
+    setGroomers(linkedGroomers);
+    setStep("groomer");
+  }
+
+  function handleSelectGroomer(groomer: Groomer) {
+    setSelectedGroomer(groomer);
+    setStep("slot");
+  }
+
+  const loadMonthAvailability = useCallback(async () => {
+    if (!selectedService || !parlour) return;
+    if (selectedService.requires_groomer_selection && !selectedGroomer) return;
+
+    setLoadingMonth(true);
+    const { year, month } = calendarMonth;
+    const startDate = new Date(year, month, 1).toISOString().slice(0, 10);
+    const endDate = new Date(year, month + 1, 0).toISOString().slice(0, 10);
+
+    const { data, error: rpcError } = await supabase.rpc("get_available_days", {
+      p_parlour_id: parlour.id,
+      p_service_id: selectedService.id,
+      p_groomer_id: selectedGroomer?.id ?? null,
+      p_start_date: startDate,
+      p_end_date: endDate,
+    });
+
+    setLoadingMonth(false);
+    if (rpcError) {
+      setError(rpcError.message);
+      return;
+    }
+    setAvailableDays(new Set((data ?? []).map((row: { available_date: string }) => row.available_date)));
+  }, [supabase, selectedService, selectedGroomer, parlour, calendarMonth]);
+
+  const checkAvailability = useCallback(async () => {
+    if (!selectedService || !parlour) return;
+    if (selectedService.requires_groomer_selection && !selectedGroomer) return;
+
+    setCheckingSlots(true);
+    setSelectedSlot(null);
+
+    const { data, error: rpcError } = selectedService.requires_groomer_selection
+      ? await supabase.rpc("get_available_slots", {
+          p_groomer_id: selectedGroomer!.id,
+          p_date: date,
+          p_duration_minutes: selectedService.duration_minutes,
+        })
+      : await supabase.rpc("get_capacity_slots", {
+          p_parlour_id: parlour.id,
+          p_service_id: selectedService.id,
+          p_date: date,
+          p_duration_minutes: selectedService.duration_minutes,
+        });
+
+    setCheckingSlots(false);
+    if (rpcError) {
+      setError(rpcError.message);
+      return;
+    }
+    setSlots(data ?? []);
+  }, [supabase, selectedGroomer, selectedService, date, parlour]);
+
+  useEffect(() => {
+    if (step === "slot") loadMonthAvailability();
+  }, [step, loadMonthAvailability]);
+
+  useEffect(() => {
+    if (step === "slot" && date) checkAvailability();
+  }, [step, date, checkAvailability]);
+
+  const flatPrice = selectedService?.price_rule.find((r) => !r.attribute_type);
+  const attributeRules = selectedService?.price_rule.filter((r) => r.attribute_type) ?? [];
+  const selectedDog = dogs.find((d) => d.id === dogId);
+
+  let autoMatchedRule: PriceRule | null = null;
+  if (attributeRules.length > 0 && selectedDog) {
+    for (const rule of attributeRules) {
+      const dogValue =
+        rule.attribute_type === "size"
+          ? selectedDog.size
+          : rule.attribute_type === "coat_type"
+          ? selectedDog.coat_type
+          : null;
+      if (dogValue && dogValue.toLowerCase() === rule.attribute_value?.toLowerCase()) {
+        autoMatchedRule = rule;
+        break;
+      }
+    }
+  }
+
+  const resolvedRule =
+    flatPrice ?? autoMatchedRule ?? attributeRules.find((r) => r.id === manualPriceRuleId) ?? null;
 
   async function handleAddDog(e: React.FormEvent) {
     e.preventDefault();
@@ -257,127 +376,6 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     setBookingConfirmed(true);
   }
 
-  async function handleSelectService(service: Service) {
-    setSelectedService(service);
-    setError(null);
-
-    if (!service.requires_groomer_selection) {
-      setSelectedGroomer(null);
-      setStep("slot");
-      return;
-    }
-
-    const { data: groomerLinks } = await supabase
-      .from("groomer_service")
-      .select("groomer:groomer_id(id, name)")
-      .eq("service_id", service.id);
-
-    const linkedGroomers = ((groomerLinks ?? []) as unknown as { groomer: Groomer }[]).map(
-      (g) => g.groomer
-    );
-
-    setGroomers(linkedGroomers);
-    setStep("groomer");
-  }
-
-  function handleSelectGroomer(groomer: Groomer) {
-    setSelectedGroomer(groomer);
-    setStep("slot");
-  }
-
-  const checkAvailability = useCallback(async () => {
-    if (!selectedService || !parlour) return;
-    if (selectedService.requires_groomer_selection && !selectedGroomer) return;
-
-    setCheckingSlots(true);
-    setSelectedSlot(null);
-
-    const { data, error: rpcError } = selectedService.requires_groomer_selection
-      ? await supabase.rpc("get_available_slots", {
-          p_groomer_id: selectedGroomer!.id,
-          p_date: date,
-          p_duration_minutes: selectedService.duration_minutes,
-        })
-      : await supabase.rpc("get_capacity_slots", {
-          p_parlour_id: parlour.id,
-          p_service_id: selectedService.id,
-          p_date: date,
-          p_duration_minutes: selectedService.duration_minutes,
-        });
-
-    setCheckingSlots(false);
-
-    if (rpcError) {
-      setError(rpcError.message);
-      return;
-    }
-    setSlots(data ?? []);
-  }, [supabase, selectedGroomer, selectedService, date, parlour]);
-
-  const loadMonthAvailability = useCallback(async () => {
-    if (!selectedService || !parlour) return;
-    if (selectedService.requires_groomer_selection && !selectedGroomer) return;
-
-    setLoadingMonth(true);
-
-    const { year, month } = calendarMonth;
-    const startDate = new Date(year, month, 1).toISOString().slice(0, 10);
-    const endDate = new Date(year, month + 1, 0).toISOString().slice(0, 10);
-
-    const { data, error: rpcError } = await supabase.rpc("get_available_days", {
-      p_parlour_id: parlour.id,
-      p_service_id: selectedService.id,
-      p_groomer_id: selectedGroomer?.id ?? null,
-      p_start_date: startDate,
-      p_end_date: endDate,
-    });
-
-    setLoadingMonth(false);
-
-    if (rpcError) {
-      setError(rpcError.message);
-      return;
-    }
-
-    setAvailableDays(
-      new Set((data ?? []).map((row: { available_date: string }) => row.available_date))
-    );
-  }, [supabase, selectedService, selectedGroomer, parlour, calendarMonth]);
-
-  useEffect(() => {
-    if (step === "slot") loadMonthAvailability();
-  }, [step, loadMonthAvailability]);
-
-  useEffect(() => {
-    if (step === "slot" && date) checkAvailability();
-  }, [step, date, checkAvailability]);
-
-  const flatPrice = selectedService?.price_rule.find((r) => !r.attribute_type);
-  const attributeRules = selectedService?.price_rule.filter((r) => r.attribute_type) ?? [];
-  const selectedDog = dogs.find((d) => d.id === dogId);
-
-  let autoMatchedRule: PriceRule | null = null;
-  if (attributeRules.length > 0 && selectedDog) {
-    for (const rule of attributeRules) {
-      const dogValue =
-        rule.attribute_type === "size"
-          ? selectedDog.size
-          : rule.attribute_type === "coat_type"
-          ? selectedDog.coat_type
-          : null;
-      if (dogValue && dogValue.toLowerCase() === rule.attribute_value?.toLowerCase()) {
-        autoMatchedRule = rule;
-        break;
-      }
-    }
-  }
-
-  const resolvedRule =
-    flatPrice ??
-    autoMatchedRule ??
-    attributeRules.find((r) => r.id === manualPriceRuleId) ??
-    null;
-
   if (loading) {
     return (
       <div className="min-h-screen px-4 py-10 pb-28">
@@ -402,9 +400,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
       <div className="min-h-screen flex items-center justify-center px-4 text-center">
         <div>
           <h1 className="text-xl font-semibold text-[#14261F] mb-2">Parlour not found</h1>
-          <p className="text-sm text-[#14261F]/60">
-            Double-check the link your parlour gave you.
-          </p>
+          <p className="text-sm text-[#14261F]/60">Double-check the link your parlour gave you.</p>
         </div>
       </div>
     );
@@ -414,15 +410,24 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
     <div className="min-h-screen px-4 py-10 pb-28">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-[#14261F] mx-auto mb-3 flex items-center justify-center">
-            <PawIcon className="w-7 h-7 text-[#E8A87C]" />
+          <div
+            className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center overflow-hidden"
+            style={{ backgroundColor: brand.primaryColor }}
+          >
+            {brand.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={brand.logoUrl} alt={parlour.name} className="w-full h-full object-cover" />
+            ) : (
+              <PawIcon className="w-7 h-7" style={{ color: brand.accentColor }} />
+            )}
           </div>
           <h1 className="text-2xl font-semibold text-[#14261F]">{parlour.name}</h1>
           <p className="text-sm text-[#14261F]/50 mt-1">Book your dog&apos;s next groom</p>
           {!userId && (
             <a
               href={`/book/${slug}/welcome`}
-              className="inline-block text-xs text-[#D98F5F] font-medium underline mt-2"
+              className="inline-block text-xs font-medium underline mt-2"
+              style={{ color: brand.accentColor }}
             >
               New here? Set up your dog&apos;s profile
             </a>
@@ -435,21 +440,21 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           </div>
         )}
 
-        {/* Step indicator */}
         <div className="flex items-center gap-1 mb-6">
           {["service", "groomer", "slot", "confirm"].map((s, i) => (
             <div
               key={s}
-              className={`h-1 flex-1 rounded-full ${
-                ["service", "groomer", "slot", "confirm"].indexOf(step) >= i
-                  ? "bg-[#14261F]"
-                  : "bg-black/10"
-              }`}
+              className="h-1 flex-1 rounded-full"
+              style={{
+                backgroundColor:
+                  ["service", "groomer", "slot", "confirm"].indexOf(step) >= i
+                    ? brand.primaryColor
+                    : "rgba(0,0,0,0.1)",
+              }}
             />
           ))}
         </div>
 
-        {/* Step: choose service */}
         {step === "service" && (
           <div className="space-y-3 step-enter" key="service">
             {services.length === 0 && (
@@ -464,16 +469,14 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                 <button
                   key={service.id}
                   onClick={() => handleSelectService(service)}
-                  className="w-full bg-white border border-black/10 rounded-2xl p-4 text-left hover:border-[#14261F]/30 transition-colors"
+                  className="w-full bg-white border border-black/10 rounded-2xl p-4 text-left hover:border-black/30 transition-colors"
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="font-semibold text-[#14261F]">{service.name}</div>
-                      <div className="text-xs text-[#14261F]/50">
-                        {service.duration_minutes} min
-                      </div>
+                      <div className="text-xs text-[#14261F]/50">{service.duration_minutes} min</div>
                     </div>
-                    <div className="text-sm font-semibold text-[#D98F5F]">
+                    <div className="text-sm font-semibold" style={{ color: brand.accentColor }}>
                       {flat
                         ? `R${Number(flat.price).toFixed(0)}`
                         : range.length > 0
@@ -487,13 +490,9 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           </div>
         )}
 
-        {/* Step: choose groomer */}
         {step === "groomer" && selectedService && (
           <div className="step-enter" key="groomer">
-            <button
-              onClick={() => setStep("service")}
-              className="text-xs text-[#14261F]/50 mb-4 hover:underline"
-            >
+            <button onClick={() => setStep("service")} className="text-xs text-[#14261F]/50 mb-4 hover:underline">
               ← Back
             </button>
             <p className="text-sm text-[#14261F]/70 mb-4">
@@ -501,15 +500,13 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
             </p>
             <div className="space-y-2">
               {groomers.length === 0 && (
-                <p className="text-sm text-[#14261F]/50 italic">
-                  No groomer available for this service yet.
-                </p>
+                <p className="text-sm text-[#14261F]/50 italic">No groomer available for this service yet.</p>
               )}
               {groomers.map((groomer) => (
                 <button
                   key={groomer.id}
                   onClick={() => handleSelectGroomer(groomer)}
-                  className="w-full bg-white border border-black/10 rounded-2xl p-4 text-left font-medium text-[#14261F] hover:border-[#14261F]/30 transition-colors"
+                  className="w-full bg-white border border-black/10 rounded-2xl p-4 text-left font-medium text-[#14261F] hover:border-black/30 transition-colors"
                 >
                   {groomer.name}
                 </button>
@@ -518,7 +515,6 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           </div>
         )}
 
-        {/* Step: choose slot */}
         {step === "slot" && selectedService && (
           <div className="step-enter" key="slot">
             <button
@@ -533,15 +529,15 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
               selectedDate={date}
               availableDays={availableDays}
               loading={loadingMonth}
+              accentColor={brand.accentColor}
+              primaryColor={brand.primaryColor}
               onSelectDate={(d) => setDate(d)}
               onChangeMonth={(year, month) => setCalendarMonth({ year, month })}
             />
             {checkingSlots ? (
               <p className="text-sm text-[#14261F]/50">Checking availability…</p>
             ) : slots.length === 0 ? (
-              <p className="text-sm text-[#14261F]/50 italic">
-                No slots available this date — try another day.
-              </p>
+              <p className="text-sm text-[#14261F]/50 italic">No slots available this date — try another day.</p>
             ) : (
               <div className="grid grid-cols-3 gap-2 mb-4">
                 {slots.map((slot) => (
@@ -551,7 +547,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                       setSelectedSlot(slot);
                       setStep("confirm");
                     }}
-                    className="bg-white border border-black/15 rounded-lg text-center py-2.5 text-sm text-[#14261F] hover:border-[#14261F]/40"
+                    className="bg-white border border-black/15 rounded-lg text-center py-2.5 text-sm text-[#14261F] hover:border-black/40"
                   >
                     {new Date(slot.slot_start).toLocaleTimeString("en-ZA", {
                       hour: "2-digit",
@@ -565,14 +561,10 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           </div>
         )}
 
-        {/* Step: confirm — auth, client details, dog, then real submission */}
         {step === "confirm" && selectedSlot && selectedService && (
           <div className="step-enter" key="confirm">
             {!bookingConfirmed && (
-              <button
-                onClick={() => setStep("slot")}
-                className="text-xs text-[#14261F]/50 mb-4 hover:underline"
-              >
+              <button onClick={() => setStep("slot")} className="text-xs text-[#14261F]/50 mb-4 hover:underline">
                 ← Back
               </button>
             )}
@@ -604,9 +596,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
               {resolvedRule && (
                 <div className="flex justify-between text-sm pt-3 border-t border-black/10">
                   <span className="text-[#14261F]/50">Price</span>
-                  <span className="font-semibold text-[#14261F]">
-                    R{Number(resolvedRule.price).toFixed(2)}
-                  </span>
+                  <span className="font-semibold text-[#14261F]">R{Number(resolvedRule.price).toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -616,8 +606,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                 <div className="text-2xl mb-2">🎉</div>
                 <p className="font-semibold text-[#14261F] mb-1">Booking confirmed!</p>
                 <p className="text-sm text-[#14261F]/60">
-                  See you then — {parlour?.name} will be ready for{" "}
-                  {selectedDog?.name ?? "your dog"}.
+                  See you then — {parlour.name} will be ready for {selectedDog?.name ?? "your dog"}.
                 </p>
               </div>
             ) : !authChecked ? (
@@ -628,22 +617,24 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                   <button
                     type="button"
                     onClick={() => setAuthMode("signup")}
-                    className={`flex-1 text-xs rounded-lg py-2 border ${
+                    className="flex-1 text-xs rounded-lg py-2 border"
+                    style={
                       authMode === "signup"
-                        ? "bg-[#14261F] text-[#FAF6EF] border-[#14261F]"
-                        : "bg-white text-[#14261F] border-black/15"
-                    }`}
+                        ? { backgroundColor: brand.primaryColor, color: "#fff", borderColor: brand.primaryColor }
+                        : { borderColor: "rgba(0,0,0,0.15)", color: "#14261F" }
+                    }
                   >
                     New client
                   </button>
                   <button
                     type="button"
                     onClick={() => setAuthMode("login")}
-                    className={`flex-1 text-xs rounded-lg py-2 border ${
+                    className="flex-1 text-xs rounded-lg py-2 border"
+                    style={
                       authMode === "login"
-                        ? "bg-[#14261F] text-[#FAF6EF] border-[#14261F]"
-                        : "bg-white text-[#14261F] border-black/15"
-                    }`}
+                        ? { backgroundColor: brand.primaryColor, color: "#fff", borderColor: brand.primaryColor }
+                        : { borderColor: "rgba(0,0,0,0.15)", color: "#14261F" }
+                    }
                   >
                     I&apos;ve booked here before
                   </button>
@@ -673,7 +664,8 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                 <button
                   type="submit"
                   disabled={authLoading}
-                  className="w-full bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
+                  className="w-full rounded-full py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                  style={{ backgroundColor: brand.primaryColor }}
                 >
                   {authLoading ? "…" : authMode === "signup" ? "Continue" : "Sign in"}
                 </button>
@@ -709,7 +701,8 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                 />
                 <button
                   type="submit"
-                  className="w-full bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold"
+                  className="w-full rounded-full py-2.5 text-sm font-semibold text-white"
+                  style={{ backgroundColor: brand.primaryColor }}
                 >
                   Continue
                 </button>
@@ -761,7 +754,8 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                     />
                     <button
                       type="submit"
-                      className="text-xs bg-[#14261F] text-[#FAF6EF] rounded-lg px-4"
+                      className="text-xs rounded-lg px-4 text-white"
+                      style={{ backgroundColor: brand.primaryColor }}
                     >
                       Add dog
                     </button>
@@ -792,11 +786,10 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
                   <button
                     onClick={handleSubmitBooking}
                     disabled={submitting}
-                    className="w-full bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
+                    className="w-full rounded-full py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                    style={{ backgroundColor: brand.primaryColor }}
                   >
-                    {submitting
-                      ? "Confirming…"
-                      : `Confirm booking — R${Number(resolvedRule.price).toFixed(2)}`}
+                    {submitting ? "Confirming…" : `Confirm booking — R${Number(resolvedRule.price).toFixed(2)}`}
                   </button>
                 )}
               </div>
@@ -804,7 +797,7 @@ export default function BookingPage({ params }: { params: Promise<{ slug: string
           </div>
         )}
       </div>
-      <BottomNav slug={slug} />
+      <BottomNav slug={slug} primaryColor={brand.primaryColor} />
     </div>
   );
 }
@@ -815,6 +808,8 @@ function MiniCalendar({
   selectedDate,
   availableDays,
   loading,
+  accentColor,
+  primaryColor,
   onSelectDate,
   onChangeMonth,
 }: {
@@ -823,12 +818,14 @@ function MiniCalendar({
   selectedDate: string;
   availableDays: Set<string>;
   loading: boolean;
+  accentColor: string;
+  primaryColor: string;
   onSelectDate: (date: string) => void;
   onChangeMonth: (year: number, month: number) => void;
 }) {
   const todayStr = new Date().toISOString().slice(0, 10);
   const firstOfMonth = new Date(year, month, 1);
-  const startWeekday = firstOfMonth.getDay(); // 0 = Sunday
+  const startWeekday = firstOfMonth.getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const monthLabel = firstOfMonth.toLocaleDateString("en-ZA", { month: "long", year: "numeric" });
 
@@ -854,24 +851,14 @@ function MiniCalendar({
   return (
     <div className="bg-white border border-black/10 rounded-2xl p-4 mb-4">
       <div className="flex items-center justify-between mb-3">
-        <button
-          type="button"
-          onClick={goPrevMonth}
-          className="text-[#14261F]/50 hover:text-[#14261F] px-2"
-          aria-label="Previous month"
-        >
+        <button type="button" onClick={goPrevMonth} className="text-[#14261F]/50 hover:text-[#14261F] px-2">
           ‹
         </button>
         <div className="text-sm font-semibold text-[#14261F]">
           {monthLabel}
           {loading && <span className="text-[#14261F]/40 font-normal"> · loading…</span>}
         </div>
-        <button
-          type="button"
-          onClick={goNextMonth}
-          className="text-[#14261F]/50 hover:text-[#14261F] px-2"
-          aria-label="Next month"
-        >
+        <button type="button" onClick={goNextMonth} className="text-[#14261F]/50 hover:text-[#14261F] px-2">
           ›
         </button>
       </div>
@@ -887,7 +874,6 @@ function MiniCalendar({
       <div className="grid grid-cols-7 gap-1">
         {cells.map((day, i) => {
           if (day === null) return <div key={`blank-${i}`} />;
-
           const ds = dateStr(day);
           const isPast = ds < todayStr;
           const isAvailable = availableDays.has(ds) && !isPast;
@@ -899,17 +885,18 @@ function MiniCalendar({
               key={ds}
               disabled={!isAvailable}
               onClick={() => onSelectDate(ds)}
-              className={`aspect-square rounded-lg text-xs flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              className="aspect-square rounded-lg text-xs flex flex-col items-center justify-center gap-0.5 transition-colors"
+              style={
                 isSelected
-                  ? "bg-[#14261F] text-[#FAF6EF]"
+                  ? { backgroundColor: primaryColor, color: "#fff" }
                   : isAvailable
-                  ? "text-[#14261F] hover:bg-[#FAF6EF] border border-black/10"
-                  : "text-[#14261F]/25"
-              }`}
+                  ? { color: "#14261F", border: "1px solid rgba(0,0,0,0.1)" }
+                  : { color: "rgba(20,38,31,0.25)" }
+              }
             >
               <span>{day}</span>
               {isAvailable && !isSelected && (
-                <span className="w-1 h-1 rounded-full bg-[#D98F5F]" />
+                <span className="w-1 h-1 rounded-full" style={{ backgroundColor: accentColor }} />
               )}
             </button>
           );

@@ -52,7 +52,6 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
 
-  // Dog fields
   const [dogName, setDogName] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -119,9 +118,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
     const ext = file.name.split(".").pop();
     const path = `${userId}/${Date.now()}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from("dog-photos")
-      .upload(path, file, { upsert: true });
+    const { error: uploadError } = await supabase.storage.from("dog-photos").upload(path, file, { upsert: true });
 
     if (uploadError) {
       setUploadingPhoto(false);
@@ -165,9 +162,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
     }
 
     if (!data.session) {
-      setError(
-        "Check your email to confirm your account, then come back and sign in."
-      );
+      setError("Check your email to confirm your account, then come back and sign in.");
       return;
     }
 
@@ -270,20 +265,13 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
         {step !== "welcome" && step !== "done" && (
           <div className="flex items-center gap-1 mb-6">
             {STEPS.slice(1, -1).map((s, i) => (
-              <div
-                key={s}
-                className={`h-1 flex-1 rounded-full ${
-                  i <= stepIdx - 1 ? "bg-[#14261F]" : "bg-black/10"
-                }`}
-              />
+              <div key={s} className={`h-1 flex-1 rounded-full ${i <= stepIdx - 1 ? "bg-[#14261F]" : "bg-black/10"}`} />
             ))}
           </div>
         )}
 
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
-            {error}
-          </div>
+          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{error}</div>
         )}
 
         {step === "welcome" && (
@@ -291,13 +279,11 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <div className="w-16 h-16 rounded-2xl bg-[#14261F] mx-auto mb-4 flex items-center justify-center">
               <PawIcon className="w-8 h-8 text-[#E8A87C]" />
             </div>
-            <h1 className="text-2xl font-semibold text-[#14261F] mb-2">
-              Welcome to {parlourName}
-            </h1>
+            <h1 className="text-2xl font-semibold text-[#14261F] mb-2">Welcome to {parlourName}</h1>
             <p className="text-sm text-[#14261F]/60 mb-8 leading-relaxed">
-              Let&apos;s get your dog&apos;s profile set up — breed, style, personality, and
-              anything else we should know to take great care of them. Add as much or as
-              little as you like — you can always fill in more later.
+              Let&apos;s get your dog&apos;s profile set up — breed, style, personality, and anything else we should
+              know to take great care of them. Add as much or as little as you like — you can always fill in more
+              later.
             </p>
             <button
               onClick={() => setStep(userId ? "details" : "auth")}
@@ -324,7 +310,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
                 onClick={() => setAuthMode("login")}
                 className={`flex-1 text-xs rounded-lg py-2 border ${authMode === "login" ? "bg-[#14261F] text-[#FAF6EF] border-[#14261F]" : "border-black/15 text-[#14261F]"}`}
               >
-                I've been here before
+                I&apos;ve been here before
               </button>
             </div>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]" />
@@ -333,10 +319,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
               {saving ? "…" : "Continue"}
             </button>
             {authMode === "login" && (
-              <a
-                href={`/forgot-password?slug=${encodeURIComponent(slug)}`}
-                className="block text-center text-xs text-[#14261F]/50 underline"
-              >
+              <a href={`/forgot-password?slug=${encodeURIComponent(slug)}`} className="block text-center text-xs text-[#14261F]/50 underline">
                 Forgot your password?
               </a>
             )}
@@ -369,12 +352,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
                     <PawIcon className="w-7 h-7 text-[#14261F]/25" />
                   )}
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
+                <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
               </label>
             </div>
             <p className="text-xs text-[#14261F]/40 text-center -mt-1 mb-2">Tap to add a photo</p>
@@ -391,11 +369,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <button onClick={goNext} className="w-full bg-[#14261F] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold">
               Continue
             </button>
-            <button
-              onClick={handleFinish}
-              disabled={saving || !dogName.trim()}
-              className="w-full text-[#14261F]/50 text-xs underline disabled:opacity-40"
-            >
+            <button onClick={handleFinish} disabled={saving || !dogName.trim()} className="w-full text-[#14261F]/50 text-xs underline disabled:opacity-40">
               {saving ? "Saving…" : "Skip the rest — just book me in"}
             </button>
           </div>
@@ -433,9 +407,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
-                  className={`text-xs rounded-full px-3 py-1.5 border ${
-                    tags.has(tag) ? "bg-[#D98F5F] text-white border-[#D98F5F]" : "border-black/15 text-[#14261F]"
-                  }`}
+                  className={`text-xs rounded-full px-3 py-1.5 border ${tags.has(tag) ? "bg-[#D98F5F] text-white border-[#D98F5F]" : "border-black/15 text-[#14261F]"}`}
                 >
                   {tag}
                 </button>
@@ -497,12 +469,8 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <div className="w-16 h-16 rounded-2xl bg-[#14261F] mx-auto mb-4 flex items-center justify-center">
               <GiftIcon className="w-8 h-8 text-[#E8A87C]" />
             </div>
-            <h1 className="text-xl font-semibold text-[#14261F] mb-2">
-              {dogName}&apos;s profile is all set
-            </h1>
-            <p className="text-sm text-[#14261F]/60 mb-8">
-              Ready to book their next groom at {parlourName}.
-            </p>
+            <h1 className="text-xl font-semibold text-[#14261F] mb-2">{dogName}&apos;s profile is all set</h1>
+            <p className="text-sm text-[#14261F]/60 mb-8">Ready to book their next groom at {parlourName}.</p>
             <button
               onClick={() => router.push(`/book/${slug}`)}
               className="bg-[#14261F] text-[#FAF6EF] rounded-full px-6 py-3 text-sm font-semibold"

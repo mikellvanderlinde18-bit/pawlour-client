@@ -16,8 +16,6 @@ function ResetPasswordForm() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Supabase's password recovery link establishes a temporary session
-    // automatically when this page loads with the recovery token in the URL.
     supabase.auth.getSession().then(({ data: { session } }) => {
       setReady(!!session);
     });
@@ -61,9 +59,7 @@ function ResetPasswordForm() {
         ) : (
           <form onSubmit={handleSubmit} className="bg-white border border-black/10 rounded-2xl p-6 space-y-3">
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                {error}
-              </div>
+              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>
             )}
             <input
               type="password"

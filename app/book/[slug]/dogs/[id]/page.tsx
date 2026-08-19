@@ -19,11 +19,7 @@ const PERSONALITY_TAGS = [
   "Nervous nelly",
 ];
 
-export default function DogProfilePage({
-  params,
-}: {
-  params: Promise<{ slug: string; id: string }>;
-}) {
+export default function DogProfilePage({ params }: { params: Promise<{ slug: string; id: string }> }) {
   const { slug, id } = use(params);
   const isNew = id === "new";
   const router = useRouter();
@@ -68,11 +64,7 @@ export default function DogProfilePage({
       return;
     }
 
-    const { data: parlourRow } = await supabase
-      .from("parlour")
-      .select("id")
-      .eq("subdomain", slug)
-      .maybeSingle();
+    const { data: parlourRow } = await supabase.from("parlour").select("id").eq("subdomain", slug).maybeSingle();
     if (!parlourRow) {
       setLoading(false);
       return;
@@ -144,9 +136,7 @@ export default function DogProfilePage({
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${Date.now()}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from("dog-photos")
-      .upload(path, file, { upsert: true });
+    const { error: uploadError } = await supabase.storage.from("dog-photos").upload(path, file, { upsert: true });
 
     if (uploadError) {
       setUploadingPhoto(false);
@@ -236,13 +226,10 @@ export default function DogProfilePage({
         </h1>
 
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
-            {error}
-          </div>
+          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{error}</div>
         )}
 
         <div className="space-y-4">
-          {/* Basics */}
           <div className="bg-white border border-black/10 rounded-2xl p-5 space-y-3">
             <p className="text-xs font-semibold text-[#14261F]/50 uppercase tracking-wide">Basics</p>
             <div className="flex justify-center">
@@ -272,7 +259,6 @@ export default function DogProfilePage({
             </div>
           </div>
 
-          {/* Style */}
           <div className="bg-white border border-black/10 rounded-2xl p-5 space-y-3">
             <p className="text-xs font-semibold text-[#14261F]/50 uppercase tracking-wide">Look &amp; style</p>
             <select value={size} onChange={(e) => setSize(e.target.value)} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]">
@@ -287,7 +273,6 @@ export default function DogProfilePage({
             <input type="text" value={cutStyle} onChange={(e) => setCutStyle(e.target.value)} placeholder="Preferred cut style" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]" />
           </div>
 
-          {/* Personality */}
           <div className="bg-white border border-black/10 rounded-2xl p-5 space-y-3">
             <p className="text-xs font-semibold text-[#14261F]/50 uppercase tracking-wide">Personality</p>
             <div className="flex flex-wrap gap-2">
@@ -296,9 +281,7 @@ export default function DogProfilePage({
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
-                  className={`text-xs rounded-full px-3 py-1.5 border ${
-                    tags.has(tag) ? "bg-[#D98F5F] text-white border-[#D98F5F]" : "border-black/15 text-[#14261F]"
-                  }`}
+                  className={`text-xs rounded-full px-3 py-1.5 border ${tags.has(tag) ? "bg-[#D98F5F] text-white border-[#D98F5F]" : "border-black/15 text-[#14261F]"}`}
                 >
                   {tag}
                 </button>
@@ -307,7 +290,6 @@ export default function DogProfilePage({
             <textarea value={about} onChange={(e) => setAbout(e.target.value)} placeholder={`Tell us more about ${name || "them"}...`} rows={3} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]" />
           </div>
 
-          {/* Health */}
           <div className="bg-white border border-black/10 rounded-2xl p-5 space-y-3">
             <p className="text-xs font-semibold text-[#14261F]/50 uppercase tracking-wide">Health &amp; care</p>
             <textarea value={healthNotes} onChange={(e) => setHealthNotes(e.target.value)} placeholder="Allergies or health conditions" rows={2} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]" />
@@ -323,7 +305,6 @@ export default function DogProfilePage({
             </div>
           </div>
 
-          {/* Preferences */}
           <div className="bg-white border border-black/10 rounded-2xl p-5 space-y-3">
             <p className="text-xs font-semibold text-[#14261F]/50 uppercase tracking-wide">Favorites &amp; quirks</p>
             <input type="text" value={favoriteTreat} onChange={(e) => setFavoriteTreat(e.target.value)} placeholder="Favorite treat" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#14261F]" />
@@ -337,11 +318,7 @@ export default function DogProfilePage({
           </button>
 
           {!isNew && (
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="w-full text-red-500 text-xs underline disabled:opacity-40"
-            >
+            <button onClick={handleDelete} disabled={deleting} className="w-full text-red-500 text-xs underline disabled:opacity-40">
               {deleting ? "Removing…" : "Remove this dog"}
             </button>
           )}

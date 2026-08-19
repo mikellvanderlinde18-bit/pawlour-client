@@ -9,7 +9,13 @@ const TABS = [
   { key: "account", label: "Account", Icon: UserIcon, href: (slug: string) => `/book/${slug}/account` },
 ];
 
-export default function BottomNav({ slug }: { slug: string }) {
+export default function BottomNav({
+  slug,
+  primaryColor = "#14261F",
+}: {
+  slug: string;
+  primaryColor?: string;
+}) {
   const pathname = usePathname();
 
   return (
@@ -27,14 +33,15 @@ export default function BottomNav({ slug }: { slug: string }) {
                 className="flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-2xl transition-transform active:scale-90"
               >
                 <Icon
-                  className={`w-5 h-5 transition-all ${
-                    active ? "text-[#14261F] scale-110" : "text-[#14261F]/40"
-                  }`}
+                  className="w-5 h-5 transition-all"
+                  style={{
+                    color: active ? primaryColor : `${primaryColor}66`,
+                    transform: active ? "scale(1.1)" : "scale(1)",
+                  }}
                 />
                 <span
-                  className={`text-[10px] font-medium transition-colors ${
-                    active ? "text-[#14261F]" : "text-[#14261F]/40"
-                  }`}
+                  className="text-[10px] font-medium transition-colors"
+                  style={{ color: active ? primaryColor : `${primaryColor}66` }}
                 >
                   {tab.label}
                 </span>
