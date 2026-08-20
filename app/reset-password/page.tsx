@@ -49,7 +49,7 @@ function ResetPasswordForm() {
             <p className="text-sm text-[#1A1A1A] mb-4">Your password has been updated.</p>
             <a
               href={returnSlug ? `/book/${returnSlug}` : "/"}
-              className="inline-block bg-[#1A1A1A] text-[#FAF6EF] rounded-full px-5 py-2.5 text-sm font-semibold"
+              className="inline-block bg-[#1A1A1A] text-white rounded-full px-5 py-2.5 text-sm font-semibold"
             >
               Continue
             </a>
@@ -73,7 +73,7 @@ function ResetPasswordForm() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
+              className="w-full bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
             >
               {saving ? "Saving…" : "Update password"}
             </button>

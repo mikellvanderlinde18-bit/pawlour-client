@@ -62,7 +62,7 @@ function ForgotPasswordForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
+              className="w-full bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold disabled:opacity-50"
             >
               {loading ? "Sending…" : "Send reset link"}
             </button>

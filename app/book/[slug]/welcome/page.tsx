@@ -287,7 +287,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             </p>
             <button
               onClick={() => setStep(userId ? "details" : "auth")}
-              className="bg-[#1A1A1A] text-[#FAF6EF] rounded-full px-6 py-3 text-sm font-semibold"
+              className="bg-[#1A1A1A] text-white rounded-full px-6 py-3 text-sm font-semibold"
             >
               Let&apos;s go
             </button>
@@ -301,21 +301,21 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
               <button
                 type="button"
                 onClick={() => setAuthMode("signup")}
-                className={`flex-1 text-xs rounded-lg py-2 border ${authMode === "signup" ? "bg-[#1A1A1A] text-[#FAF6EF] border-[#1A1A1A]" : "border-black/15 text-[#1A1A1A]"}`}
+                className={`flex-1 text-xs rounded-lg py-2 border ${authMode === "signup" ? "bg-[#1A1A1A] text-white border-[#1A1A1A]" : "border-black/15 text-[#1A1A1A]"}`}
               >
                 New here
               </button>
               <button
                 type="button"
                 onClick={() => setAuthMode("login")}
-                className={`flex-1 text-xs rounded-lg py-2 border ${authMode === "login" ? "bg-[#1A1A1A] text-[#FAF6EF] border-[#1A1A1A]" : "border-black/15 text-[#1A1A1A]"}`}
+                className={`flex-1 text-xs rounded-lg py-2 border ${authMode === "login" ? "bg-[#1A1A1A] text-white border-[#1A1A1A]" : "border-black/15 text-[#1A1A1A]"}`}
               >
                 I&apos;ve been here before
               </button>
             </div>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
             <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
-            <button type="submit" disabled={saving} className="w-full bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50">
+            <button type="submit" disabled={saving} className="w-full bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold disabled:opacity-50">
               {saving ? "…" : "Continue"}
             </button>
             {authMode === "login" && (
@@ -331,7 +331,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <p className="text-sm font-semibold text-[#1A1A1A] mb-1">A little about you</p>
             <input type="text" required value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Your name" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
             <input type="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="Phone number" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
-            <button type="submit" disabled={saving} className="w-full bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50">
+            <button type="submit" disabled={saving} className="w-full bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold disabled:opacity-50">
               {saving ? "…" : "Continue"}
             </button>
           </form>
@@ -366,7 +366,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
                 <option value="Female">Female</option>
               </select>
             </div>
-            <button onClick={goNext} className="w-full bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold">
+            <button onClick={goNext} className="w-full bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold">
               Continue
             </button>
             <button onClick={handleFinish} disabled={saving || !dogName.trim()} className="w-full text-[#1A1A1A]/50 text-xs underline disabled:opacity-40">
@@ -390,7 +390,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <input type="text" value={cutStyle} onChange={(e) => setCutStyle(e.target.value)} placeholder="Preferred cut style" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
             <div className="flex gap-2">
               <button onClick={goBack} className="flex-1 border border-black/15 text-[#1A1A1A] rounded-full py-2.5 text-sm font-semibold">Back</button>
-              <button onClick={goNext} className="flex-1 bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold">Continue</button>
+              <button onClick={goNext} className="flex-1 bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold">Continue</button>
             </div>
             <button onClick={skipToFinish} disabled={saving} className="w-full text-[#1A1A1A]/50 text-xs underline disabled:opacity-40">
               Skip the rest — just book me in
@@ -407,7 +407,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
-                  className={`text-xs rounded-full px-3 py-1.5 border ${tags.has(tag) ? "bg-[#D98F5F] text-white border-[#D98F5F]" : "border-black/15 text-[#1A1A1A]"}`}
+                  className={`text-xs rounded-full px-3 py-1.5 border ${tags.has(tag) ? "bg-[#1A1A1A] text-white border-[#1A1A1A]" : "border-black/15 text-[#1A1A1A]"}`}
                 >
                   {tag}
                 </button>
@@ -416,7 +416,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <textarea value={about} onChange={(e) => setAbout(e.target.value)} placeholder={`Tell us more about ${dogName || "them"}...`} rows={3} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
             <div className="flex gap-2">
               <button onClick={goBack} className="flex-1 border border-black/15 text-[#1A1A1A] rounded-full py-2.5 text-sm font-semibold">Back</button>
-              <button onClick={goNext} className="flex-1 bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold">Continue</button>
+              <button onClick={goNext} className="flex-1 bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold">Continue</button>
             </div>
             <button onClick={skipToFinish} disabled={saving} className="w-full text-[#1A1A1A]/50 text-xs underline disabled:opacity-40">
               Skip the rest — just book me in
@@ -435,12 +435,12 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             </div>
             <div className="flex items-center gap-4 text-sm text-[#1A1A1A]">
               <span>Vaccinated?</span>
-              <button type="button" onClick={() => setVaccinated(true)} className={`px-3 py-1.5 rounded-full text-xs border ${vaccinated === true ? "bg-[#1A1A1A] text-[#FAF6EF] border-[#1A1A1A]" : "border-black/15"}`}>Yes</button>
-              <button type="button" onClick={() => setVaccinated(false)} className={`px-3 py-1.5 rounded-full text-xs border ${vaccinated === false ? "bg-[#1A1A1A] text-[#FAF6EF] border-[#1A1A1A]" : "border-black/15"}`}>No</button>
+              <button type="button" onClick={() => setVaccinated(true)} className={`px-3 py-1.5 rounded-full text-xs border ${vaccinated === true ? "bg-[#1A1A1A] text-white border-[#1A1A1A]" : "border-black/15"}`}>Yes</button>
+              <button type="button" onClick={() => setVaccinated(false)} className={`px-3 py-1.5 rounded-full text-xs border ${vaccinated === false ? "bg-[#1A1A1A] text-white border-[#1A1A1A]" : "border-black/15"}`}>No</button>
             </div>
             <div className="flex gap-2">
               <button onClick={goBack} className="flex-1 border border-black/15 text-[#1A1A1A] rounded-full py-2.5 text-sm font-semibold">Back</button>
-              <button onClick={goNext} className="flex-1 bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold">Continue</button>
+              <button onClick={goNext} className="flex-1 bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold">Continue</button>
             </div>
             <button onClick={skipToFinish} disabled={saving} className="w-full text-[#1A1A1A]/50 text-xs underline disabled:opacity-40">
               Skip the rest — just book me in
@@ -457,7 +457,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <textarea value={specialRequests} onChange={(e) => setSpecialRequests(e.target.value)} placeholder="Anything else we should know?" rows={2} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
             <div className="flex gap-2">
               <button onClick={goBack} className="flex-1 border border-black/15 text-[#1A1A1A] rounded-full py-2.5 text-sm font-semibold">Back</button>
-              <button onClick={handleFinish} disabled={saving} className="flex-1 bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50">
+              <button onClick={handleFinish} disabled={saving} className="flex-1 bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold disabled:opacity-50">
                 {saving ? "Saving…" : "Finish"}
               </button>
             </div>
@@ -473,7 +473,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
             <p className="text-sm text-[#1A1A1A]/60 mb-8">Ready to book their next groom at {parlourName}.</p>
             <button
               onClick={() => router.push(`/book/${slug}`)}
-              className="bg-[#1A1A1A] text-[#FAF6EF] rounded-full px-6 py-3 text-sm font-semibold"
+              className="bg-[#1A1A1A] text-white rounded-full px-6 py-3 text-sm font-semibold"
             >
               Start booking
             </button>

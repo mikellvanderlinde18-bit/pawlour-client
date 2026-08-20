@@ -281,7 +281,7 @@ export default function DogProfilePage({ params }: { params: Promise<{ slug: str
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
-                  className={`text-xs rounded-full px-3 py-1.5 border ${tags.has(tag) ? "bg-[#D98F5F] text-white border-[#D98F5F]" : "border-black/15 text-[#1A1A1A]"}`}
+                  className={`text-xs rounded-full px-3 py-1.5 border ${tags.has(tag) ? "bg-[#1A1A1A] text-white border-[#1A1A1A]" : "border-black/15 text-[#1A1A1A]"}`}
                 >
                   {tag}
                 </button>
@@ -300,8 +300,8 @@ export default function DogProfilePage({ params }: { params: Promise<{ slug: str
             </div>
             <div className="flex items-center gap-3 text-sm text-[#1A1A1A]">
               <span>Vaccinated?</span>
-              <button type="button" onClick={() => setVaccinated(true)} className={`px-3 py-1.5 rounded-full text-xs border ${vaccinated === true ? "bg-[#1A1A1A] text-[#FAF6EF] border-[#1A1A1A]" : "border-black/15"}`}>Yes</button>
-              <button type="button" onClick={() => setVaccinated(false)} className={`px-3 py-1.5 rounded-full text-xs border ${vaccinated === false ? "bg-[#1A1A1A] text-[#FAF6EF] border-[#1A1A1A]" : "border-black/15"}`}>No</button>
+              <button type="button" onClick={() => setVaccinated(true)} className={`px-3 py-1.5 rounded-full text-xs border ${vaccinated === true ? "bg-[#1A1A1A] text-white border-[#1A1A1A]" : "border-black/15"}`}>Yes</button>
+              <button type="button" onClick={() => setVaccinated(false)} className={`px-3 py-1.5 rounded-full text-xs border ${vaccinated === false ? "bg-[#1A1A1A] text-white border-[#1A1A1A]" : "border-black/15"}`}>No</button>
             </div>
           </div>
 
@@ -313,7 +313,7 @@ export default function DogProfilePage({ params }: { params: Promise<{ slug: str
             <textarea value={specialRequests} onChange={(e) => setSpecialRequests(e.target.value)} placeholder="Anything else we should know?" rows={2} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
           </div>
 
-          <button onClick={handleSave} disabled={saving} className="w-full bg-[#1A1A1A] text-[#FAF6EF] rounded-full py-2.5 text-sm font-semibold disabled:opacity-50">
+          <button onClick={handleSave} disabled={saving} className="w-full bg-[#1A1A1A] text-white rounded-full py-2.5 text-sm font-semibold disabled:opacity-50">
             {saving ? "Saving…" : isNew ? "Add dog" : "Save changes"}
           </button>
 
