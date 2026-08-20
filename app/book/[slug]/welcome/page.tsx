@@ -53,6 +53,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
   const [clientPhone, setClientPhone] = useState("");
 
   const [dogName, setDogName] = useState("");
+  const [species, setSpecies] = useState<"dog" | "cat" | "other">("dog");
   const [photoUrl, setPhotoUrl] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [breed, setBreed] = useState("");
@@ -220,6 +221,7 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
     const { error: dogErr } = await supabase.from("dog").insert({
       client_id: clientId,
       name: dogName.trim(),
+      species,
       photo_url: photoUrl || null,
       breed: breed.trim() || null,
       size: size || null,
@@ -356,7 +358,21 @@ export default function WelcomePage({ params }: { params: Promise<{ slug: string
               </label>
             </div>
             <p className="text-xs text-[#1A1A1A]/40 text-center -mt-1 mb-2">Tap to add a photo</p>
-            <input type="text" value={dogName} onChange={(e) => setDogName(e.target.value)} placeholder="Dog's name" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
+            <div className="flex gap-2 mb-1">
+              {(["dog", "cat", "other"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSpecies(s)}
+                  className={`flex-1 text-xs rounded-lg py-2 border capitalize ${
+                    species === s ? "bg-[#1A1A1A] text-white border-[#1A1A1A]" : "border-black/15 text-[#1A1A1A]"
+                  }`}
+                >
+                  {s === "dog" ? "🐾 Dog" : s === "cat" ? "🐱 Cat" : "Other"}
+                </button>
+              ))}
+            </div>
+            <input type="text" value={dogName} onChange={(e) => setDogName(e.target.value)} placeholder="Their name" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
             <input type="text" value={breed} onChange={(e) => setBreed(e.target.value)} placeholder="Breed" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />
             <div className="flex gap-2">
               <input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} className="flex-1 rounded-lg border border-black/15 px-3 py-2 text-sm text-[#1A1A1A]" />

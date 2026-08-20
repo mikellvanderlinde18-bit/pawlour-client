@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, use } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useParlourBrand } from "@/lib/useParlourBrand";
 import BottomNav from "@/components/BottomNav";
-import { PawIcon } from "@/components/icons";
+import { PawIcon, CheckIcon } from "@/components/icons";
 
 type Parlour = { id: string; name: string };
 type Dog = { id: string; name: string; breed: string | null; size: string | null; photo_url: string | null };
@@ -193,6 +193,35 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
               <p className="text-sm font-medium" style={{ color: brand.accentColor }}>
                 🎉 You&apos;ve earned a reward — it&apos;ll apply to your next visit.
               </p>
+            ) : rewardRule.trigger_type === "visit_count" ? (
+              <>
+                <div className="grid grid-cols-5 gap-2.5 mb-2">
+                  {Array.from({ length: rewardRule.threshold }).map((_, i) => {
+                    const filled = i < progress;
+                    return (
+                      <div
+                        key={i}
+                        className="aspect-square rounded-full flex items-center justify-center border-2 transition-colors"
+                        style={
+                          filled
+                            ? { backgroundColor: brand.accentColor, borderColor: brand.accentColor }
+                            : { borderColor: "rgba(0,0,0,0.12)", borderStyle: "dashed" }
+                        }
+                      >
+                        {filled ? (
+                          <CheckIcon className="w-4 h-4 text-white" />
+                        ) : (
+                          <PawIcon className="w-3.5 h-3.5 text-[#1A1A1A]/15" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-[#1A1A1A]/50">
+                  {progress} of {rewardRule.threshold} visits — collect a stamp every time your dog is
+                  groomed and paid for
+                </p>
+              </>
             ) : (
               <>
                 <div className="h-2 bg-[#FAFAF8] rounded-full overflow-hidden mb-2">
@@ -205,9 +234,7 @@ export default function AccountPage({ params }: { params: Promise<{ slug: string
                   />
                 </div>
                 <p className="text-xs text-[#1A1A1A]/60">
-                  {rewardRule.trigger_type === "visit_count"
-                    ? `${progress} of ${rewardRule.threshold} visits`
-                    : `R${progress.toFixed(0)} of R${rewardRule.threshold} spent`}
+                  R{progress.toFixed(0)} of R{rewardRule.threshold} spent
                 </p>
               </>
             )}
